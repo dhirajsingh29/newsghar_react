@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import defaultImg from '../default.png'
 
 export class NewsItem extends Component {
     render() {
@@ -7,7 +8,7 @@ export class NewsItem extends Component {
         return (
             <div className='my-3'>
                 <div className="card" style={{width: "18rem"}}>
-                    <img src={imageUrl ? imageUrl : '../default.png'} className="card-img-top" alt="..." />
+                    <img src={imageUrl ? imageUrl : defaultImg} className="card-img-top" alt="..." />
                         <div className="card-body">
                             <h5 className="card-title">{title}</h5>
                             <p className="card-text">{description}</p>
