@@ -4,6 +4,11 @@ import Spinner from './Spinner';
 import PropTypes from 'prop-types'
 
 export class News extends Component {
+    capitalize = (word) => {
+        const lower = word.toLowerCase();
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+    }
+
     static defaultProps = {
         country: 'in',
         pageSize: 9,
@@ -16,18 +21,20 @@ export class News extends Component {
         category: PropTypes.string
     }
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.state = {
             articles: [],
             loading: false,
             page: 1
         };
+
+        document.title = `${this.capitalize(this.props.category)} - NewsGhar`;
     }
 
-    async componentDidMount() {
-        let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=cc396ef416804526a864b5199fa8cfeb&page=1&pageSize=${this.props.pageSize}`;
+    async updateNews() {
+        const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=cc396ef416804526a864b5199fa8cfeb&page=${this.state.page}&pageSize=${this.props.pageSize}`;
 
         this.setState({
             loading: true
@@ -43,44 +50,31 @@ export class News extends Component {
         })
     }
 
+    async componentDidMount() {
+        this.updateNews();
+    }
+
     handlePreviousClick = async () => {
-        let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=cc396ef416804526a864b5199fa8cfeb&page=${this.state.page - 1}&pageSize=${this.props.pageSize}`;
-
+        // callback is required in order for state to set correct page number
         this.setState({
-            loading: true
-        });
-
-        let data = await fetch(url);
-        let parsedData = await data.json();
-
-        this.setState({
-            articles: parsedData.articles,
-            page: this.state.page - 1,
-            loading: false
-        });
+            page: this.state.page - 1
+        }, () => this.updateNews());
     }
 
     handleNextClick = async () => {
-        let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=cc396ef416804526a864b5199fa8cfeb&page=${this.state.page + 1}&pageSize=${this.props.pageSize}`;
-
+        // callback is required in order for state to set correct page number
+        // else same page will be oaded on first time Next click
         this.setState({
-            loading: true
-        });
-
-        let data = await fetch(url);
-        let parsedData = await data.json();
-
-        this.setState({
-            articles: parsedData.articles,
-            page: this.state.page + 1,
-            loading: false
-        });
+            page: this.state.page + 1
+        }, () => this.updateNews());
     }
 
     render() {
         return (
             <div className='container my-3'>
-                <h2 className='text-center' style={{margin: '30px 0px'}}>NewsGhar - Top Headlines</h2>
+                <h2 className='text-center' style={{ margin: '30px 0px' }}>
+                    NewsGhar - Top {this.capitalize(this.props.category)} Headlines
+                </h2>
                 {this.state.loading && <Spinner />}
                 <div className="row">
                     {
@@ -92,7 +86,7 @@ export class News extends Component {
                                         title={element.title}
                                         description={element.description}
                                         imageUrl={element.urlToImage}
-                                        newsUrl={element.url} 
+                                        newsUrl={element.url}
                                         author={element.author}
                                         date={element.publishedAt}
                                         source={element.source.name} />
